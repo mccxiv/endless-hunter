@@ -8,6 +8,7 @@ export default class Boot extends Phaser.State {
     this.loadWorldAssets();
     this.loadSprites();
     this.disablePauseWhenUnfocused();
+    this.enablePixelRounding();
   }
 
   create() {this.game.state.start('MainGame')}
@@ -23,6 +24,10 @@ export default class Boot extends Phaser.State {
     const tilesheetUri = load('./map/tilesheet.png');
     this.cache.addTilemap('world', null, map, Phaser.Tilemap.TILED_JSON);
     this.cache.addImage('gameTiles', null, this.image(tilesheetUri));
+  }
+
+  enablePixelRounding() {
+    this.game.renderer.renderSession.roundPixels = true;
   }
 
   loadSprites() {

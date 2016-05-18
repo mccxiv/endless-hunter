@@ -24,11 +24,14 @@ export default class MainGame extends Phaser.State {
     this.monsters = new Map();
     this.progression = new Progression(this.state);
     this.items = Items;
+    this.cameraPos= new Phaser.Point(0, 0);
   }
   
 	create() {
     this.listenToClicks();
     this.makePlayer();
+    this.setInitialCameraPosition();
+
     setInterval(() => this.player.heal(1), 225); // Regen player HP.
     this.spawnMonster(26, 7);
     this.spawnMonster(20, 8);
@@ -37,6 +40,7 @@ export default class MainGame extends Phaser.State {
 	}
   
   update() {
+    this.updateCamera();
     if (this.hasEnergy()) {
       if (this.player.isIdle()) {
         if (this.progression.canUpgrade()) {
@@ -48,6 +52,14 @@ export default class MainGame extends Phaser.State {
         else this.hunt();
       }
     }
+  }
+
+  updateCamera() {
+    const player = this.player.getSprite().position;
+    const lerp = 0.02;
+    this.cameraPos.x += (player.x - this.cameraPos.x) * lerp;
+    this.cameraPos.y += (player.y - this.cameraPos.y) * lerp;
+    this.camera.focusOnXY(this.cameraPos.x, this.cameraPos.y);
   }
 
   notUpgrading() {
@@ -102,11 +114,18 @@ export default class MainGame extends Phaser.State {
   makePlayer() {
     const {x, y} = this.tilemap.getSpawnLocation();
     this.player = new Entity({x, y}, 'platearmor', 10);
-    this.camera.follow(this.player.getSprite());
     this.player.events.on('hp', hp => {
       this.state.healthiness = Math.round((hp / this.player.getMaxHp() * 100));
     });
     this.player.events.once('death', () => this.makePlayer());
+  }
+
+  setInitialCameraPosition() {
+    const playerPos = this.player.getSprite().position;
+    this.cameraPos.x = playerPos.x;
+    this.cameraPos.y = playerPos.y;
+    this.camera.focusOn(this.player.getSprite());
+    //this.camera.follow(this.player.getSprite());
   }
 
   spawnMonster(x, y) {
@@ -135,8 +154,10 @@ export default class MainGame extends Phaser.State {
     y += -offsetY;
     const point = this.tilemap.toTile({x, y});
     this.player.clearTarget();
-    console.log('Moving to: ', point.x, point.y);
     this.state.activity = null;
     this.player.goTo(point);
+
+    console.log('clicked at ', {x, y});
+    console.log('Moving to: ', point.x, point.y);
   }
 }
