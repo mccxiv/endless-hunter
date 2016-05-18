@@ -54,14 +54,11 @@ class World {
   }
 
   _makeTilemapLayers() {
-    const layers = [
-      'base', 'desert', 'dirt', 'savannah', 'grass', 'cobblestone', 'lakes',
-      'lakes2', 'bridge', 'fences', 'props', 'props2', 'trees1', 'trees2',
-      'houses'
-    ];
     this.tilemap = this.game.add.tilemap('world');
     this.tilemap.addTilesetImage('tilesheet', 'gameTiles');
-    layers.forEach((layer) => this.tilemap.createLayer(layer));
+    this.tilemap.layers
+      .filter(l => l.name !== 'collision')
+      .forEach((l) => this.tilemap.createLayer(l.name));
     this.collisionLayer = this.tilemap.createLayer('collision');
     this.collisionLayer.visible = false;
   }
