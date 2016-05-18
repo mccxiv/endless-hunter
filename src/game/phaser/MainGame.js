@@ -85,9 +85,8 @@ export default class MainGame extends Phaser.State {
   }
 
   makePlayer() {
-    const spawn = this.tilemap.objects.find(o => o.name === 'spawn');
-    const spawnLoc = this.tilemap.toTile()
-    this.player = new Entity({x: 16, y: 3}, 'platearmor', 10);
+    const {x, y} = this.tilemap.getSpawnLocation();
+    this.player = new Entity({x, y}, 'platearmor', 10);
     this.camera.follow(this.player.getSprite());
     this.player.events.on('hp', hp => {
       this.state.healthiness = Math.round((hp / this.player.getMaxHp() * 100));

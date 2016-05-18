@@ -15,6 +15,18 @@ class World {
     this._setWalkableGrid();
   }
 
+  getSpawnLocation() {
+    const objects = this.tilemap.objects.objects;
+    const spawn = objects.find(o => o.name === 'spawn');
+    return this.toTile(spawn);
+  }
+
+  getEntityLocations(name) {
+    const all = this.tilemap.objects.objects;
+    const objects = all.filter(o => o.name === name);
+    return objects.map(o => this.toTile(o));
+  }
+
   pathTo({x: fromX, y: fromY}, {x: toX, y: toY}) {
     let path;
     const astar = new EasyStar();

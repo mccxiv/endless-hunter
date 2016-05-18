@@ -4,7 +4,7 @@
   "description": "A game that plays itself",
   "scripts": {
     "dev": "nodemon src/server/s.js --exec babel-node --presets es2015,stage-0",
-    "start": "babel-node --presets es2015,stage-0 src/server/s.js"
+    "start": "webpack-dev-server --content-base ./demo"
   },
   "dependencies": {
     "babel-polyfill": "^6.8.0",
