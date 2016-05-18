@@ -6,6 +6,15 @@ import Tilemap from '../singletons/tilemap';
 import Entity from '../classes/Entity';
 import Progression from '../classes/Progression';
 
+/** MainGame duties:
+ *    - Decide what to do next, in the update loop.
+ *    - Move the character to the right places to accomplish actions.
+ *    - Perform actions, with the help of Progression's methods, if necessary.
+ *    - Record successful actions via Progressions's methods.
+ *
+ *  P.S. Progression's methods generally deal with permanent state.
+ *  Movement, combat, mining etc are not considered permanent state,
+ *  because they are not saved to disk, only their results are. */
 export default class MainGame extends Phaser.State {
   preload() {
     this.state = state;
@@ -28,19 +37,25 @@ export default class MainGame extends Phaser.State {
 	}
   
   update() {
-    if (this.player.isIdle()) {
-      if (this.progression.canUpgrade()) {
-        if (this.notUpgrading()) {
-          if (!this.isAtUpgradeLocation()) this.goToUpgradeLocation();
-          else this.startUpgrade();
+    if (this.hasEnergy()) {
+      if (this.player.isIdle()) {
+        if (this.progression.canUpgrade()) {
+          if (this.notUpgrading()) {
+            if (!this.isAtUpgradeLocation()) this.goToUpgradeLocation();
+            else this.startUpgrade();
+          }
         }
+        else this.hunt();
       }
-      else this.hunt();
     }
   }
 
   notUpgrading() {
     return this.state.activity !== 'UPGRADING';
+  }
+  
+  hasEnergy() {
+    return !!this.state.energy;
   }
 
   isAtUpgradeLocation() {
