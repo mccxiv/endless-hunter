@@ -43,7 +43,7 @@ export default class MainGame extends Phaser.State {
 	}
   
   update() {
-    this.updateCamera();
+    this.cameraManager.updatePosition();
     if (this.hasEnergy()) {
       if (this.player.isIdle()) {
         if (this.progression.canUpgrade()) {
@@ -55,10 +55,6 @@ export default class MainGame extends Phaser.State {
         else this.hunt();
       }
     }
-  }
-
-  updateCamera() {
-
   }
 
   notUpgrading() {
