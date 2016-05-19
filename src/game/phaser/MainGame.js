@@ -2,9 +2,10 @@ import state from '../state/state';
 import sleep from 'sleep-promise';
 import Items from '../classes/Items';
 import Phaser from 'phaser-shim';
-import Tilemap from '../singletons/tilemap';
+import Tilemap from '../classes/World';
 import Entity from '../classes/Entity';
 import Progression from '../classes/Progression';
+import CameraManager from '../classes/CameraManager';
 
 /** MainGame duties:
  *    - Decide what to do next, in the update loop.
@@ -19,8 +20,9 @@ export default class MainGame extends Phaser.State {
   preload() {
     this.state = state;
     this.upgradeLocation = {x: 0, y: 0};
-    this.tilemap = Tilemap();
-    this.player = null;
+    this.tilemap = new Tilemap();
+    this.player = new Entity(this.tilemap.getSpawnLocation(), 'platearmor', 10);
+    this.cameraManager = new CameraManager();
     this.monsters = new Map();
     this.progression = new Progression(this.state);
     this.items = Items;
@@ -30,6 +32,7 @@ export default class MainGame extends Phaser.State {
 	create() {
     this.listenToClicks();
     this.makePlayer();
+    this.cameraManager.setSprite(this.player.getSprite());
     this.setInitialCameraPosition();
 
     setInterval(() => this.player.heal(1), 225); // Regen player HP.
@@ -55,11 +58,7 @@ export default class MainGame extends Phaser.State {
   }
 
   updateCamera() {
-    const player = this.player.getSprite().position;
-    const lerp = 0.02;
-    this.cameraPos.x += (player.x - this.cameraPos.x) * lerp;
-    this.cameraPos.y += (player.y - this.cameraPos.y) * lerp;
-    this.camera.focusOnXY(this.cameraPos.x, this.cameraPos.y);
+
   }
 
   notUpgrading() {
@@ -112,8 +111,6 @@ export default class MainGame extends Phaser.State {
   }
 
   makePlayer() {
-    const {x, y} = this.tilemap.getSpawnLocation();
-    this.player = new Entity({x, y}, 'platearmor', 10);
     this.player.events.on('hp', hp => {
       this.state.healthiness = Math.round((hp / this.player.getMaxHp() * 100));
     });

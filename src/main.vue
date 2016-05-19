@@ -23,7 +23,7 @@
 
   export default {
     components: {Bar, Health, Task, Level, Notifications, Box, Recipes},
-    ready() {Game(this.$els.canvas)}
+    ready() {new Game(this.$els.canvas)}
   }
 </script>
 

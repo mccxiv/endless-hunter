@@ -1,2 +1,2 @@
-import game from './singletons/game';
-export default game;
+import Game from './classes/Game';
+export default Game;
