@@ -19,9 +19,8 @@ import CameraManager from '../classes/CameraManager';
 export default class MainGame extends Phaser.State {
   preload() {
     this.state = state;
-    this.upgradeLocation = {x: 0, y: 0};
     this.tilemap = new Tilemap();
-    this.player = new Entity(this.tilemap.getSpawnLocation(), 'platearmor', 10);
+    this.player = new Entity(this.tilemap.getLocation('spawn'), 'platearmor', 10);
     this.cameraManager = new CameraManager();
     this.monsters = new Map();
     this.progression = new Progression(this.state);
@@ -67,13 +66,13 @@ export default class MainGame extends Phaser.State {
 
   isAtUpgradeLocation() {
     const {x, y} = this.player.getTile();
-    const target = this.upgradeLocation;
+    const target = this.tilemap.getLocation('upgrade');
     return x === target.x && y === target.y;
   }
 
   goToUpgradeLocation() {
     this.state.activity = 'WALKING_TO_UPGRADE';
-    this.player.goTo(this.upgradeLocation);
+    this.player.goTo(this.tilemap.getLocation('upgrade'));
   }
 
   startUpgrade() {

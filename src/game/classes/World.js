@@ -20,11 +20,11 @@ export default class World {
     instance = instance || new World();
     return instance;
   }
-
-  getSpawnLocation() {
+  
+  getLocation(name) {
     const objects = this.tilemap.objects.objects;
-    const spawn = objects.find(o => o.name === 'spawn');
-    return this.toTile(spawn);
+    const object = objects.find(o => o.name === name);
+    return this.toTile(object);
   }
 
   getEntityLocations(name) {

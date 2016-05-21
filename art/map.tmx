@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" nextobjectid="26">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" nextobjectid="27">
  <tileset firstgid="1" name="tilesheet" tilewidth="32" tileheight="32" tilecount="1960">
   <image source="img/tilesheet.png" width="640" height="3136"/>
   <terraintypes>
@@ -1493,5 +1493,6 @@
   <object id="23" name="deathknight" x="1440" y="192" width="32" height="32"/>
   <object id="24" name="bat" x="896" y="352" width="32" height="32"/>
   <object id="25" name="bat" x="512" y="320" width="32" height="32"/>
+  <object id="26" name="upgrade" x="192" y="672" width="32" height="32"/>
  </objectgroup>
 </map>

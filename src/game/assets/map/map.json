@@ -556,6 +556,21 @@
                  "width":32,
                  "x":512,
                  "y":320
+                }, 
+                {
+                 "height":32,
+                 "id":26,
+                 "name":"upgrade",
+                 "properties":
+                    {
+
+                    },
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":192,
+                 "y":672
                 }],
          "opacity":1,
          "properties":
@@ -568,7 +583,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":26,
+ "nextobjectid":27,
  "orientation":"orthogonal",
  "properties":
     {
