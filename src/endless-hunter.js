@@ -1,13 +1,21 @@
-import Vue from 'vue';
-import Main from './main.vue';
+import Game from './game/classes/Game';
+import Ui from './ui/ui';
+import createState from './game/objects/state';
 
 export default class EndlessHunter {
-  constructor({el: selector}) {
-    new Vue({
-      el: selector,
-      components: {Main},
-      template: '<main></main>',
-      replace: false
-    });
+  constructor({el, state}) {
+    this.elements = {game: null, ui: null};
+    this.state = state || createState();
+    this.prepDom(el);
+    this.game = new Game(this.elements.game, this.state);
+    this.ui = new Ui(this.elements.ui, this.state);
+  }
+
+  prepDom(el) {
+    if (typeof el === 'string') el = document.querySelector(el);
+    this.elements.game = document.createElement('div');
+    this.elements.ui = document.createElement('div');
+    el.appendChild(this.elements.game);
+    el.appendChild(this.elements.ui);
   }
 }

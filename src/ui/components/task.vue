@@ -3,10 +3,8 @@
 </template>
 
 <script type="text/babel">
-  import state from '../../game/state/state';
   import Progression from '../../game/classes/Progression';
 
-  const progression = new Progression(state);
   const human = {
     'UPGRADING': 'Crafting upgrade',
     'WALKING_TO_UPGRADE': 'Ready to craft upgrade',
@@ -14,12 +12,17 @@
   };
 
   export default {
-    data: () => ({state}),
+    data() {
+      return {
+        state: this.$root.state,
+        progression: new Progression(this.$root.state)
+      };
+    },
     methods: {
       humanTaskText() {
         let text = human[this.state.activity] || '';
         if (this.state.activity === 'HUNTING') {
-          const needed = progression.getNeededDrops();
+          const needed = this.progression.getNeededDrops();
           if (startsWithVowel(needed[0])) text += 'n';
           text += ` ${needed[0]}`;
           if (needed.length > 1) text += ` and ${needed.length - 1} more item`;

@@ -1,10 +1,8 @@
-import Game from './Game';
 import EasyStar from 'exports?EasyStar.js!easystarjs';
 
-let instance;
-
 export default class World {
-  constructor() {
+  constructor(game) {
+    this.game = game;
     this.tilemap = null;
     this.collisionLayer = null;
     this.walkableGrid = null;
@@ -14,11 +12,6 @@ export default class World {
     this._setWorldBounds();
     this._setTileSize();
     this._setWalkableGrid();
-  }
-
-  static get instance() {
-    instance = instance || new World();
-    return instance;
   }
   
   getLocation(name) {
@@ -46,7 +39,7 @@ export default class World {
   }
 
   toTile({x, y}) {
-    const math = Game.instance.math;
+    const math = this.game.math;
     const c = (coord) => math.snapToFloor(coord / this.tileSize, 1);
     return {x: c(x), y: c(y)};
   }
@@ -73,7 +66,7 @@ export default class World {
   }
 
   _makeTilemapLayers() {
-    this.tilemap = Game.instance.add.tilemap('world');
+    this.tilemap = this.game.add.tilemap('world');
     this.tilemap.addTilesetImage('tilesheet', 'gameTiles');
     this.tilemap.layers
       .filter(l => l.name !== 'collision')
@@ -84,6 +77,6 @@ export default class World {
 
   _setWorldBounds() {
     const {widthInPixels: w, heightInPixels: h} = this.tilemap;
-    Game.instance.world.setBounds(0, 0, w, h);
+    this.game.world.setBounds(0, 0, w, h);
   }
 }

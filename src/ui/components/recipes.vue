@@ -10,14 +10,16 @@
 
 <script type="text/babel">
   import Items from '../../game/classes/Items';
-  import state from '../../game/state/state';
   import Recipe from './recipe.vue';
 
-  const {recipe, inventory} = state;
+
 
   export default {
     components: {Recipe},
-    data: () => ({recipe, inventory}),
+    data() {
+      const {recipe, inventory} = this.$root.state;
+      return {recipe, inventory};
+    },
     ready() {this.applyCheckmarks()},
     methods: {
       clearCheckmarks() {

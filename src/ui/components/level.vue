@@ -3,12 +3,9 @@
 </template>
 
 <script type="text/babel">
-  import state from '../../game/state/state';
-
   export default {
-    data: () => ({state})
+    data() {return {state: this.$root.state}}
   }
-
 </script>
 
 <style scoped>

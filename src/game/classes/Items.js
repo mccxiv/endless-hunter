@@ -3,7 +3,7 @@ import items from '../assets/items/items.yaml';
 import {RandomDataGenerator} from 'phaser-shim';
 
 const rnd = new RandomDataGenerator();
-rnd.sow([Date.now()])
+rnd.sow([Date.now()]);
 
 export default class Items {
 

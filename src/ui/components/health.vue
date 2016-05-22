@@ -1,7 +1,7 @@
 <template>
   <div class="health-bar">
     <div class="bar-container">
-      <div class="bar" :style="{width: state.healthiness +'%'}"></div>
+      <div class="bar" :style="{width: $root.state.healthiness +'%'}"></div>
     </div>
     <img :src="image">
   </div>
@@ -9,10 +9,11 @@
 
 <script type="text/babel">
   import image from '../img/health.png';
-  import state from '../../game/state/state';
 
   export default {
-    data: () => ({image, state})
+    data() {
+      return {image}
+    }
   }
 </script>
 

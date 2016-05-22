@@ -1,9 +1,7 @@
 import sleep from 'sleep-promise';
 import EventEmitter from 'events';
-import Game from './Game';
-import World from './World';
 
-export default function ({x, y}, spriteName, level) {
+export default function Entity({tile: {x, y}, spriteName, level, game, world}) {
   const state = {
     sprite: null,
     path: [],
@@ -27,7 +25,7 @@ export default function ({x, y}, spriteName, level) {
     clearTarget
   };
 
-  makeSprite(World.instance.toPixel({x, y}), spriteName);
+  makeSprite(world.toPixel({x, y}), spriteName);
 
   return self;
 
@@ -37,7 +35,7 @@ export default function ({x, y}, spriteName, level) {
   
   function goTo({x, y}) {
     const from = getTile();
-    const path = World.instance.pathTo(from, {x, y});
+    const path = world.pathTo(from, {x, y});
     if (!path) return;
     state.path = path;
     if (!state.moving) moveToNextTile();
@@ -103,7 +101,7 @@ export default function ({x, y}, spriteName, level) {
   }
 
   function getTile() {
-    return World.instance.toTile(state.sprite);
+    return world.toTile(state.sprite);
   }
   
   function getSprite() {
@@ -119,8 +117,8 @@ export default function ({x, y}, spriteName, level) {
     state.moving = true;
     faceNextTile();
     setWalkingAnimation();
-    const {x, y} = World.instance.toPixel(nextTile());
-    const tween = Game.instance.add.tween(state.sprite);
+    const {x, y} = world.toPixel(nextTile());
+    const tween = game.add.tween(state.sprite);
     tween.to({x, y}, 400);
     tween.onComplete.addOnce(onNewTile);
     tween.start();
@@ -202,7 +200,7 @@ export default function ({x, y}, spriteName, level) {
   }
 
   function makeSprite({x, y}, spriteName) {
-    state.sprite = Game.instance.add.sprite(x, y, spriteName);
+    state.sprite = game.add.sprite(x, y, spriteName);
     state.sprite.anchor.setTo(0.5, 0.5);
     face(randomFacing());
     createAnimations(spriteName);
@@ -213,7 +211,7 @@ export default function ({x, y}, spriteName, level) {
   }
 
   function createAnimations(spriteName) {
-    const data = Game.instance.cache.getJSON(spriteName);
+    const data = game.cache.getJSON(spriteName);
     const rowLength = state.sprite.texture.width / data.width;
     Object.keys(data.animations).forEach((animationName) => {
       const animation = data.animations[animationName];
@@ -227,6 +225,6 @@ export default function ({x, y}, spriteName, level) {
   }
 
   function randomFacing() {
-    return Game.instance.rnd.pick(['left', 'right', 'up', 'down']);
+    return game.rnd.pick(['left', 'right', 'up', 'down']);
   }
 }

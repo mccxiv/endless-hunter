@@ -1,8 +1,8 @@
-import state from '../state/state';
+import createState from '../objects/state';
 import sleep from 'sleep-promise';
 import Items from '../classes/Items';
 import Phaser from 'phaser-shim';
-import Tilemap from '../classes/World';
+import World from '../classes/World';
 import Entity from '../classes/Entity';
 import Progression from '../classes/Progression';
 import CameraManager from '../classes/CameraManager';
@@ -17,22 +17,20 @@ import CameraManager from '../classes/CameraManager';
  *  Movement, combat, mining etc are not considered permanent state,
  *  because they are not saved to disk, only their results are. */
 export default class MainGame extends Phaser.State {
+
   preload() {
-    this.state = state;
-    this.tilemap = new Tilemap();
-    this.player = new Entity(this.tilemap.getLocation('spawn'), 'platearmor', 10);
-    this.cameraManager = new CameraManager();
-    this.monsters = new Map();
+    this.state = this.game.gameState;
+    this.tileWorld = new World(this);
+    this.player = new Entity(this.makePlayerOptions());
+    this.cameraManager = new CameraManager(this.game);
     this.progression = new Progression(this.state);
-    this.items = Items;
-    this.cameraPos= new Phaser.Point(0, 0);
+    this.monsters = new Map();
   }
   
 	create() {
     this.listenToClicks();
     this.makePlayer();
-    this.cameraManager.setSprite(this.player.getSprite());
-    this.setInitialCameraPosition();
+    this.giveCameraManagerASpriteToFollow();
 
     setInterval(() => this.player.heal(1), 225); // Regen player HP.
     this.spawnMonster(26, 7);
@@ -56,6 +54,15 @@ export default class MainGame extends Phaser.State {
     }
   }
 
+  makePlayerOptions() {
+    const tile = this.tileWorld.getLocation('spawn');
+    const spriteName = 'platearmor';
+    const level = 10;
+    const game = this.game;
+    const world = this.tileWorld;
+    return {tile, spriteName, level, game, world};
+  }
+
   notUpgrading() {
     return this.state.activity !== 'UPGRADING';
   }
@@ -66,13 +73,13 @@ export default class MainGame extends Phaser.State {
 
   isAtUpgradeLocation() {
     const {x, y} = this.player.getTile();
-    const target = this.tilemap.getLocation('upgrade');
+    const target = this.tileWorld.getLocation('upgrade');
     return x === target.x && y === target.y;
   }
 
   goToUpgradeLocation() {
     this.state.activity = 'WALKING_TO_UPGRADE';
-    this.player.goTo(this.tilemap.getLocation('upgrade'));
+    this.player.goTo(this.tileWorld.getLocation('upgrade'));
   }
 
   startUpgrade() {
@@ -94,7 +101,7 @@ export default class MainGame extends Phaser.State {
     this.state.activity = null;
     const integerInRange = this.game.rnd.integerInRange.bind(this.game.rnd);
     const neededDrop = this.progression.getNeededDrops()[0];
-    const rarity = this.items.getDropRarity(neededDrop);
+    const rarity = Items.getDropRarity(neededDrop);
     let dropped = false;
     if (rarity === 'common') dropped = oneIn(10);
     else if (rarity === 'rare') dropped = oneIn(40);
@@ -112,16 +119,17 @@ export default class MainGame extends Phaser.State {
     this.player.events.once('death', () => this.makePlayer());
   }
 
-  setInitialCameraPosition() {
-    const playerPos = this.player.getSprite().position;
-    this.cameraPos.x = playerPos.x;
-    this.cameraPos.y = playerPos.y;
-    this.camera.focusOn(this.player.getSprite());
-    //this.camera.follow(this.player.getSprite());
+  giveCameraManagerASpriteToFollow() {
+    this.cameraManager.setSprite(this.player.getSprite());
   }
 
   spawnMonster(x, y) {
-    const monster = new Entity({x, y}, 'rat', this.state.level);
+    const tile = {x, y};
+    const spriteName = 'rat';
+    const level = this.state.level;
+    const game = this.game;
+    const world = this.tileWorld;
+    const monster = new Entity({tile, spriteName, level, game, world});
     this.monsters.set(monster, true);
 
     monster.events.once('death', async () => {
@@ -144,7 +152,7 @@ export default class MainGame extends Phaser.State {
     const {x: offsetX, y: offsetY} = this.game.world.worldPosition;
     x += -offsetX;
     y += -offsetY;
-    const point = this.tilemap.toTile({x, y});
+    const point = this.tileWorld.toTile({x, y});
     this.player.clearTarget();
     this.state.activity = null;
     this.player.goTo(point);
