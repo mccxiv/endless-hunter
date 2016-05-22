@@ -4,18 +4,21 @@ import createState from './game/objects/state';
 
 export default class EndlessHunter {
   constructor({el, state}) {
-    this.elements = {game: null, ui: null};
-    this.state = state || createState();
-    this.prepDom(el);
-    this.game = new Game(this.elements.game, this.state);
-    this.ui = new Ui(this.elements.ui, this.state);
+    this._state = state || createState();
+    this._elements = {game: null, ui: null};
+    this._prepDom(el);
+    this._game = new Game(this._elements.game, this._state);
+    this._ui = new Ui(this._elements.ui, this._state);
   }
 
-  prepDom(el) {
+  _prepDom(el) {
     if (typeof el === 'string') el = document.querySelector(el);
-    this.elements.game = document.createElement('div');
-    this.elements.ui = document.createElement('div');
-    el.appendChild(this.elements.game);
-    el.appendChild(this.elements.ui);
+    this._elements.game = document.createElement('div');
+    this._elements.ui = document.createElement('div');
+    el.appendChild(this._elements.game);
+    el.appendChild(this._elements.ui);
   }
+
+  get state() {return this._state}
+  get events() {return this._game.events}
 }

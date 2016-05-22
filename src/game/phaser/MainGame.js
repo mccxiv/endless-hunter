@@ -20,6 +20,7 @@ export default class MainGame extends Phaser.State {
 
   preload() {
     this.state = this.game.gameState;
+    this.events = this.game.events;
     this.tileWorld = new World(this);
     this.player = new Entity(this.makePlayerOptions());
     this.cameraManager = new CameraManager(this.game);
