@@ -1,6 +1,6 @@
 import Phaser from 'phaser-shim';
 
-const sprites = ['rat', 'platearmor'];
+const sprites = ['rat', 'platearmor', 'axe'];
 const load = require.context('../assets', true, /.*/);
 
 export default class Boot extends Phaser.State {

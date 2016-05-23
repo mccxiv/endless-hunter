@@ -10,6 +10,6 @@ export default class Player extends Entity {
   }
 
   addWeaponSprite() {
-    console.log(this);
+    this._addSprite({name: 'axe'});
   }
 }

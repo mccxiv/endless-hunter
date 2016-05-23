@@ -7,14 +7,15 @@ export default class Entity {
     this.world = world;
     this.events = new EventEmitter();
     this.state = {
-      sprite: null,
+      sprites: [],
       path: [],
       moving: false,
       facing: null,
       hp: level * 10,
       target: null
     };
-    this._makeSprite(world.toPixel({x, y}), spriteName);
+    this._addSprite({name: spriteName, position: world.toPixel({x, y})});
+    this.state.facing = this._randomFacing();
   }
 
   clearTarget() {
@@ -61,8 +62,8 @@ export default class Entity {
     this.events.emit('hp', this.state.hp);
     this._animate('death');
     await sleep(1000);
-    this.state.sprite.kill();
-    this.state.sprite.destroy();
+    this._mainSprite().kill();
+    this._mainSprite().destroy();
     this.events.emit('death');
     if (this.haveTarget()) {
       const clear = this::this.clearTarget;
@@ -92,11 +93,11 @@ export default class Entity {
   }
 
   getTile() {
-    return this.world.toTile(this.state.sprite);
+    return this.world.toTile(this._mainSprite());
   }
   
   getSprite() {
-    return this.state.sprite;
+    return this._mainSprite();
   }
 
   isIdle() {
@@ -106,6 +107,10 @@ export default class Entity {
   haveTarget() {
     return !!this.state.target;
   }
+  
+  _mainSprite() {
+    return this.state.sprites[0];
+  }
 
   _moveToNextTile() {
     if (this._isDead()) return;
@@ -113,7 +118,7 @@ export default class Entity {
     this._faceNextTile();
     this._setWalkingAnimation();
     const {x, y} = this.world.toPixel(this._nextTile());
-    const tween = this.game.add.tween(this.state.sprite);
+    const tween = this.game.add.tween(this._mainSprite());
     tween.to({x, y}, 400);
     tween.onComplete.addOnce(this::this._onNewTile);
     tween.start();
@@ -172,13 +177,15 @@ export default class Entity {
   }
 
   _animate(animation, facing) {
-    if (facing === 'left') {
-      facing = 'right';
-      this.state.sprite.scale.x = -1;
-    }
-    else this.state.sprite.scale.x = 1;
-    const animationName = facing? `${animation}_${facing}` : animation;
-    this.state.sprite.animations.play(animationName);
+    this.state.sprites.forEach((sprite) => {
+      if (facing === 'left') {
+        facing = 'right';
+        sprite.scale.x = -1;
+      }
+      else sprite.scale.x = 1;
+      const animationName = facing? `${animation}_${facing}` : animation;
+      sprite.animations.play(animationName);
+    });
   }
 
   _advancePath() {
@@ -190,27 +197,35 @@ export default class Entity {
     return this.state.path[0];
   }
 
-  _makeSprite({x, y}, spriteName) {
-    this.state.sprite = this.game.add.sprite(x, y, spriteName);
-    this.state.sprite.anchor.setTo(0.5, 0.5);
-    this.face(this._randomFacing());
-    this._createAnimations(spriteName);
+  _addSprite({name, position}) {
+    let child = false;
+    if (!position) {child = true;}
+    const {x, y} = position || {x: 0, y: 0};
+    let sprite;
+    if (!child) sprite = this.game.add.sprite(x, y, name);
+    else {
+      sprite = this.game.make.sprite(x, y, name);
+      this._mainSprite().addChild(sprite);
+    }
+    sprite.anchor.setTo(0.5, 0.5);
+    this._createAnimations(sprite, name);
+    this.state.sprites.push(sprite);
   }
 
   _isDead() {
     return this.state.hp < 1;
   }
 
-  _createAnimations(spriteName) {
+  _createAnimations(sprite, spriteName) {
     const data = this.game.cache.getJSON(spriteName);
-    const rowLength = this.state.sprite.texture.width / data.width;
+    const rowLength = sprite.texture.width / data.width;
     Object.keys(data.animations).forEach((animationName) => {
       const animation = data.animations[animationName];
       const firstFrame = rowLength * animation.row;
       const mask = new Array(animation.length).fill(0);
       const frames = mask.map((v, i) => firstFrame + i);
       const args = [animationName, frames, animation.length, true];
-      this.state.sprite.animations.add(...args);
+      sprite.animations.add(...args);
     });
     this._animate('idle', this.state.facing);
   }
