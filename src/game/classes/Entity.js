@@ -6,7 +6,7 @@ export default class Entity {
     this.game = game;
     this.world = world;
     this.events = new EventEmitter();
-    this.animationSpeed = 1.6;
+    this.animationSpeed = 1.4;
     this.state = {
       sprites: [],
       path: [],
