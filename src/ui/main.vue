@@ -4,7 +4,7 @@
     <health></health>
     <task></task>
     <level></level>
-    <box>
+    <box class="temp">
       <recipes></recipes>
     </box>
   </div>
@@ -25,6 +25,8 @@
 </script>
 
 <style>
+  .temp {display: none}
+
   .ui {
     color: #C3C3C3;
     position: relative;

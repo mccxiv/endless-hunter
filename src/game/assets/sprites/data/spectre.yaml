@@ -1,7 +1,7 @@
 name: Spectre
 level: 10
-width: 34
-height: 34
+width: 68
+height: 68
 animations:
   atk_right:  {length: 8, row: 0}
   walk_right: {length: 4, row: 1}
