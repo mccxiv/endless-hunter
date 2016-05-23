@@ -28,6 +28,7 @@ export default class Entity {
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
     this._onTargetKilledBound = this::this._onTargetKilled;
     this._setupEventEmitters();
+    this._setIdleAnimation();
   }
 
   clearTarget() {
@@ -209,10 +210,10 @@ export default class Entity {
   }
 
   _setIdleAnimation() {
-    return this._animate('idle', this.state.facing);
+    return this._animate('idle', this.state.facing, true);
   }
 
-  _animate(animation, facing) {
+  _animate(animation, facing, loop = false) {
     return this.state.sprites.map((sprite) => {
       if (facing === 'left') {
         facing = 'right';
@@ -220,7 +221,7 @@ export default class Entity {
       }
       else sprite.scale.x = 1;
       const animationName = facing? `${animation}_${facing}` : animation;
-      return sprite.animations.play(animationName, null, false);
+      return sprite.animations.play(animationName, null, loop);
     })[0];
   }
 
