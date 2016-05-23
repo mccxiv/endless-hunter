@@ -3,6 +3,7 @@ import EventEmitter from 'events';
 
 export default class Entity {
   constructor({tile: {x, y}, spriteName, level, game, world}) {
+    const self = this;
     this.game = game;
     this.world = world;
     this.events = new EventEmitter();
@@ -10,6 +11,7 @@ export default class Entity {
     this.state = {
       sprites: [],
       path: [],
+      level,
       moving: false,
       facing: null,
       hp: level * 10,
@@ -18,6 +20,7 @@ export default class Entity {
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
     this.state.facing = this._randomFacing();
     this.clearMyTarget = this::this.clearTarget;
+    this._setupEventEmitters();
   }
 
   clearTarget() {
@@ -34,10 +37,8 @@ export default class Entity {
 
   heal(hp) {
     const max = this.getMaxHp();
-    const before = this.state.hp;
     if (this.state.hp + hp > max) this.state.hp = max;
     else this.state.hp += hp;
-    if (this.state.hp !== before) this.events.emit('hp', this.state.hp);
   }
 
   face(direction) {
@@ -54,14 +55,12 @@ export default class Entity {
 
   struck(entity) {
     this.state.hp -= 10;
-    this.events.emit('hp', this.state.hp);
     if (this.state.hp < 1) this.kill();
     else if (!this.haveTarget()) this.attack(entity);
   }
 
   async kill() {
     this.state.hp = 0;
-    this.events.emit('hp', this.state.hp);
     this._animate('death');
     await sleep(1000);
     this._mainSprite().kill();
@@ -114,6 +113,17 @@ export default class Entity {
   
   _mainSprite() {
     return this.state.sprites[0];
+  }
+
+  _setupEventEmitters() {
+    let hp = this.state.hp;
+    Object.defineProperty(this.state, 'hp', {
+      get: () => hp,
+      set: (changed) => {
+        if (changed !== hp) this.events.emit('hp', changed);
+        hp = changed;
+      }
+    })
   }
 
   _moveToNextTile() {

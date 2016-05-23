@@ -107,6 +107,7 @@ export default class MainGame extends Phaser.State {
 
   makePlayer() {
     this.player.events.on('hp', hp => {
+      console.log('hp!');
       this.state.healthiness = Math.round((hp / this.player.getMaxHp() * 100));
     });
     this.player.events.once('death', () => this.makePlayer());
