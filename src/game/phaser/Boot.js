@@ -1,7 +1,8 @@
 import Phaser from 'phaser-shim';
+import monsters from '../assets/monsters.yaml';
 
-const sprites = ['rat', 'platearmor', 'axe'];
-const load = require.context('../assets', true, /.*/);
+const load = require.context('../assets/', true, /.*/);
+const playerSprites = ['platearmor', 'axe'];
 
 export default class Boot extends Phaser.State {
   preload() {
@@ -31,7 +32,7 @@ export default class Boot extends Phaser.State {
   }
 
   loadSprites() {
-    sprites.forEach((sprite) => {
+    [...monsters, ...playerSprites].forEach((sprite) => {
       const data = load(`./sprites/data/${sprite}.yaml`);
       const imageUri = load(`./sprites/img/${sprite}.png`);
       const image = this.image(imageUri);

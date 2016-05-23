@@ -2,10 +2,10 @@ import sleep from 'sleep-promise';
 import Items from '../classes/Items';
 import Phaser from 'phaser-shim';
 import World from '../classes/World';
-import Entity from '../classes/Entity';
 import Player from '../classes/Player';
 import Progression from '../classes/Progression';
 import CameraManager from '../classes/CameraManager';
+import MonsterManager from '../classes/MonsterManager';
 
 /** MainGame duties:
  *    - Decide what to do next, in the update loop.
@@ -25,19 +25,17 @@ export default class MainGame extends Phaser.State {
     this.tileWorld = new World(this);
     this.player = new Player({game: main.game, world: main.tileWorld});
     this.cameraManager = new CameraManager(this.game);
+    this.monsterManager = new MonsterManager({game: main.game, world: this.tileWorld});
     this.progression = new Progression(this.state);
-    this.monsters = new Map();
   }
   
 	create() {
     this.listenToClicks();
     this.makePlayer();
     this.giveCameraManagerASpriteToFollow();
+    this.monsterManager.spawnAll();
 
     setInterval(() => this.player.heal(1), 225); // Regen player HP.
-    this.spawnMonster(26, 7);
-    this.spawnMonster(20, 8);
-    this.spawnMonster(22, 9);
     window.game = this; // TODO remove
 	}
   
@@ -88,6 +86,7 @@ export default class MainGame extends Phaser.State {
     if (!monster) return;
     this.state.activity = 'HUNTING';
     this.player.attack(monster);
+    monster.events.once('death', this::this.onMonsterDeath);
   }
 
   onMonsterDeath() {
@@ -106,7 +105,6 @@ export default class MainGame extends Phaser.State {
 
   makePlayer() {
     this.player.events.on('hp', hp => {
-      console.log('hp!');
       this.state.healthiness = Math.round((hp / this.player.getMaxHp() * 100));
     });
     this.player.events.once('death', () => this.makePlayer());
@@ -116,25 +114,8 @@ export default class MainGame extends Phaser.State {
     this.cameraManager.setSprite(this.player.getSprite());
   }
 
-  spawnMonster(x, y) {
-    const tile = {x, y};
-    const spriteName = 'rat';
-    const level = this.state.level;
-    const game = this.game;
-    const world = this.tileWorld;
-    const monster = new Entity({tile, spriteName, level, game, world});
-    this.monsters.set(monster, true);
-
-    monster.events.once('death', async () => {
-      this.onMonsterDeath();
-      this.monsters.delete(monster);
-      await sleep(5000);
-      this.spawnMonster(x, y);
-    });
-  }
-
   getNextMonster() {
-    return this.monsters.keys().next().value;
+    return this.monsterManager.getRandomMonster('rat');
   }
 
   listenToClicks() {

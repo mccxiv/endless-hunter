@@ -2,32 +2,35 @@ import sleep from 'sleep-promise';
 import EventEmitter from 'events';
 
 export default class Entity {
+  game = null;
+  world = null;
+  events = new EventEmitter();
+  animationSpeed = 1.4;
+  state = {
+    sprites: [],
+    path: [],
+    level: null,
+    moving: false,
+    resting: false,
+    facing: null,
+    hp: null,
+    target: null
+  };
+
   constructor({tile: {x, y}, spriteName, level, game, world}) {
-    const self = this;
     this.game = game;
     this.world = world;
-    this.events = new EventEmitter();
-    this.animationSpeed = 1.4;
-    this.state = {
-      sprites: [],
-      path: [],
-      level,
-      moving: false,
-      resting: false,
-      facing: self._randomFacing(),
-      hp: level * 10,
-      target: null
-    };
+    this.state.level = level;
+    this.state.hp = level * 10;
+    this.state.facing = this._randomFacing();
+
+    console.log(spriteName);
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
     this._onTargetKilledBound = this::this._onTargetKilled;
     this._setupEventEmitters();
   }
 
-  async _onTargetKilled() {
-    this.state.resting = true;
-    this.state.target = null;
-    await sleep(1200);
-    this.state.resting = false;
+  clearTarget() {
     this.state.target = null;
   }
   
@@ -111,6 +114,17 @@ export default class Entity {
   
   haveTarget() {
     return !!this.state.target;
+  }
+  
+  getMainSpriteName() {
+    return this._mainSprite().key;
+  }
+
+  async _onTargetKilled() {
+    this.state.resting = true;
+    this.state.target = null;
+    await sleep(1200);
+    this.state.resting = false;
   }
   
   _mainSprite() {

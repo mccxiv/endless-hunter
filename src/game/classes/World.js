@@ -26,6 +26,13 @@ export default class World {
     return objects.map(o => this.toTile(o));
   }
 
+  getMonsterNames() {
+    const all = this.tilemap.objects.objects;
+    const mobs = all.filter(o => o.type === 'monster');
+    const names = mobs.map(m => m.name);
+    return [...new Set(names)];
+  }
+
   pathTo({x: fromX, y: fromY}, {x: toX, y: toY}) {
     let path;
     const astar = new EasyStar();

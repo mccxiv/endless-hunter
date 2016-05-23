@@ -1477,22 +1477,22 @@
    <property name="type" value="player"/>
   </properties>
   <object id="4" name="spawn" x="288" y="544" width="32" height="32"/>
-  <object id="8" name="rat" x="160" y="96" width="32" height="32"/>
-  <object id="11" name="rat" x="256" y="128" width="32" height="32"/>
-  <object id="12" name="rat" x="224" y="192" width="32" height="32"/>
-  <object id="13" name="goblin" x="896" y="800" width="32" height="32"/>
-  <object id="14" name="goblin" x="768" y="768" width="32" height="32"/>
-  <object id="15" name="ogre" x="1504" y="544" width="32" height="32"/>
-  <object id="16" name="crab" x="1504" y="832" width="32" height="32"/>
-  <object id="17" name="crab" x="1408" y="800" width="32" height="32"/>
-  <object id="18" name="snake" x="1120" y="512" width="32" height="32"/>
-  <object id="19" name="snake" x="1152" y="416" width="32" height="32"/>
-  <object id="20" name="skeleton" x="640" y="192" width="32" height="32"/>
-  <object id="21" name="skeleton" x="704" y="288" width="32" height="32"/>
-  <object id="22" name="spectre" x="512" y="96" width="32" height="32"/>
-  <object id="23" name="deathknight" x="1440" y="192" width="32" height="32"/>
-  <object id="24" name="bat" x="896" y="352" width="32" height="32"/>
-  <object id="25" name="bat" x="512" y="320" width="32" height="32"/>
+  <object id="8" name="rat" type="monster" x="160" y="96" width="32" height="32"/>
+  <object id="11" name="rat" type="monster" x="256" y="128" width="32" height="32"/>
+  <object id="12" name="rat" type="monster" x="224" y="192" width="32" height="32"/>
+  <object id="13" name="goblin" type="monster" x="896" y="800" width="32" height="32"/>
+  <object id="14" name="goblin" type="monster" x="768" y="768" width="32" height="32"/>
+  <object id="15" name="ogre" type="monster" x="1504" y="544" width="32" height="32"/>
+  <object id="16" name="crab" type="monster" x="1504" y="832" width="32" height="32"/>
+  <object id="17" name="crab" type="monster" x="1408" y="800" width="32" height="32"/>
+  <object id="18" name="snake" type="monster" x="1120" y="512" width="32" height="32"/>
+  <object id="19" name="snake" type="monster" x="1152" y="416" width="32" height="32"/>
+  <object id="20" name="skeleton" type="monster" x="640" y="192" width="32" height="32"/>
+  <object id="21" name="skeleton" type="monster" x="704" y="288" width="32" height="32"/>
+  <object id="22" name="spectre" type="monster" x="512" y="96" width="32" height="32"/>
+  <object id="23" name="deathknight" type="monster" x="1440" y="192" width="32" height="32"/>
+  <object id="24" name="bat" type="monster" x="896" y="352" width="32" height="32"/>
+  <object id="25" name="bat" type="monster" x="512" y="320" width="32" height="32"/>
   <object id="26" name="upgrade" x="192" y="672" width="32" height="32"/>
  </objectgroup>
 </map>
