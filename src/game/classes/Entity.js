@@ -6,6 +6,7 @@ export default class Entity {
     this.game = game;
     this.world = world;
     this.events = new EventEmitter();
+    this.animationSpeed = 1.6;
     this.state = {
       sprites: [],
       path: [],
@@ -145,11 +146,13 @@ export default class Entity {
   async _strike() {
     this.face(this.state.target.getTile());
     this._doAttackAnimation();
-    await sleep(500);
+    const animationDuration = 1000 / this.animationSpeed;
+    const halfAnimationDuration = Math.floor(animationDuration / 2);
+    await sleep(halfAnimationDuration);
     if (this._isDead()) return;
     if (!this.haveTarget()) return;
     this.state.target.struck(this);
-    await sleep(500);
+    await sleep(halfAnimationDuration);
     this._setIdleAnimation();
     await sleep(1000);
     this.attack();
@@ -227,7 +230,8 @@ export default class Entity {
       const firstFrame = rowLength * animation.row;
       const mask = new Array(animation.length).fill(0);
       const frames = mask.map((v, i) => firstFrame + i);
-      const args = [animationName, frames, animation.length, true];
+      const fps = animation.length * this.animationSpeed;
+      const args = [animationName, frames, fps, true];
       sprite.animations.add(...args);
     });
     this._animate('idle', this.state.facing);
