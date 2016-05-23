@@ -13,17 +13,21 @@ export default class Entity {
       path: [],
       level,
       moving: false,
-      facing: null,
+      resting: false,
+      facing: self._randomFacing(),
       hp: level * 10,
       target: null
     };
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
-    this.state.facing = this._randomFacing();
-    this.clearMyTarget = this::this.clearTarget;
+    this._onTargetKilledBound = this::this._onTargetKilled;
     this._setupEventEmitters();
   }
 
-  clearTarget() {
+  async _onTargetKilled() {
+    this.state.resting = true;
+    this.state.target = null;
+    await sleep(1200);
+    this.state.resting = false;
     this.state.target = null;
   }
   
@@ -55,21 +59,22 @@ export default class Entity {
 
   struck(entity) {
     this.state.hp -= 10;
-    if (this.state.hp < 1) this.kill();
-    else if (!this.haveTarget()) this.attack(entity);
+    if (!this.haveTarget()) this.attack(entity);
   }
 
   async kill() {
     this.state.hp = 0;
-    this._animate('death');
-    await sleep(1000);
-    this._mainSprite().kill();
-    this._mainSprite().destroy();
     this.events.emit('death');
-    if (this.haveTarget()) {
-      this.state.target.events.removeListener('death', this.clearMyTarget);
-    }
-    this.events.removeAllListeners();
+    const death = this._animate('death');
+    death.onComplete.addOnce(() => {
+      this._mainSprite().kill();
+      this._mainSprite().destroy();
+      if (this.haveTarget()) {
+        const cb = this._onTargetKilledBound;
+        this.state.target.events.removeListener('death', cb);
+      }
+      this.events.removeAllListeners();
+    });
   }
 
   attack(entity) {
@@ -77,10 +82,7 @@ export default class Entity {
     if (entity) {
       this.state.target = entity;
       // TODO BUG!!! Stop listening on target switch.
-      if (!entity.events) {
-        console.warn('missing events?', entity);
-      }
-      entity.events.once('death', this.clearMyTarget);
+      entity.events.once('death', this._onTargetKilledBound);
     }
     if (!this.haveTarget()) return;
     if (this._nextToTarget()) this._strike();
@@ -104,7 +106,7 @@ export default class Entity {
   }
 
   isIdle() {
-    return !this.state.target && !this.state.moving;
+    return !this.state.target && !this.state.moving && !this.state.resting;
   }
   
   haveTarget() {
@@ -120,8 +122,11 @@ export default class Entity {
     Object.defineProperty(this.state, 'hp', {
       get: () => hp,
       set: (changed) => {
-        if (changed !== hp) this.events.emit('hp', changed);
-        hp = changed;
+        if (changed !== hp) {
+          hp = changed < 0? 0 : changed;
+          this.events.emit('hp', changed);
+          if (changed === 0) this.kill();
+        }
       }
     })
   }
@@ -155,17 +160,18 @@ export default class Entity {
 
   async _strike() {
     this.face(this.state.target.getTile());
-    this._doAttackAnimation();
+    const animation = this._doAttackAnimation();
     const animationDuration = 1000 / this.animationSpeed;
     const halfAnimationDuration = Math.floor(animationDuration / 2);
+    animation.onComplete.addOnce(async () => {
+      this._setIdleAnimation();
+      await sleep(1000);
+      this.attack();
+    });
     await sleep(halfAnimationDuration);
     if (this._isDead()) return;
     if (!this.haveTarget()) return;
     this.state.target.struck(this);
-    await sleep(halfAnimationDuration);
-    this._setIdleAnimation();
-    await sleep(1000);
-    this.attack();
   }
 
   _faceNextTile() {
@@ -181,27 +187,27 @@ export default class Entity {
   }
 
   _doAttackAnimation() {
-    this._animate('atk', this.state.facing);
+    return this._animate('atk', this.state.facing);
   }
 
   _setWalkingAnimation() {
-    this._animate('walk', this.state.facing);
+    return this._animate('walk', this.state.facing);
   }
 
   _setIdleAnimation() {
-    this._animate('idle', this.state.facing);
+    return this._animate('idle', this.state.facing);
   }
 
   _animate(animation, facing) {
-    this.state.sprites.forEach((sprite) => {
+    return this.state.sprites.map((sprite) => {
       if (facing === 'left') {
         facing = 'right';
         sprite.scale.x = -1;
       }
       else sprite.scale.x = 1;
       const animationName = facing? `${animation}_${facing}` : animation;
-      sprite.animations.play(animationName);
-    });
+      return sprite.animations.play(animationName, null, false);
+    })[0];
   }
 
   _advancePath() {

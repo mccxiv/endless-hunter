@@ -91,7 +91,6 @@ export default class MainGame extends Phaser.State {
   }
 
   onMonsterDeath() {
-    this.state.activity = null;
     const integerInRange = this.game.rnd.integerInRange.bind(this.game.rnd);
     const neededDrop = this.progression.getNeededDrops()[0];
     const rarity = Items.getDropRarity(neededDrop);
