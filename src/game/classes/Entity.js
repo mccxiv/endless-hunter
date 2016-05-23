@@ -16,6 +16,7 @@ export default class Entity {
     };
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
     this.state.facing = this._randomFacing();
+    this.clearMyTarget = this::this.clearTarget;
   }
 
   clearTarget() {
@@ -66,8 +67,7 @@ export default class Entity {
     this._mainSprite().destroy();
     this.events.emit('death');
     if (this.haveTarget()) {
-      const clear = this::this.clearTarget;
-      this.state.target.events.removeListener('death', clear);
+      this.state.target.events.removeListener('death', this.clearMyTarget);
     }
     this.events.removeAllListeners();
   }
@@ -80,7 +80,7 @@ export default class Entity {
       if (!entity.events) {
         console.warn('missing events?', entity);
       }
-      entity.events.once('death', this::this.clearTarget);
+      entity.events.once('death', this.clearMyTarget);
     }
     if (!this.haveTarget()) return;
     if (this._nextToTarget()) this._strike();
@@ -148,7 +148,7 @@ export default class Entity {
     await sleep(500);
     if (this._isDead()) return;
     if (!this.haveTarget()) return;
-    this.state.target.struck(self);
+    this.state.target.struck(this);
     await sleep(500);
     this._setIdleAnimation();
     await sleep(1000);
