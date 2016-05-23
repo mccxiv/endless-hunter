@@ -1,9 +1,9 @@
-import createState from '../objects/state';
 import sleep from 'sleep-promise';
 import Items from '../classes/Items';
 import Phaser from 'phaser-shim';
 import World from '../classes/World';
 import Entity from '../classes/Entity';
+import Player from '../classes/Player';
 import Progression from '../classes/Progression';
 import CameraManager from '../classes/CameraManager';
 
@@ -19,10 +19,11 @@ import CameraManager from '../classes/CameraManager';
 export default class MainGame extends Phaser.State {
 
   preload() {
+    const main = this;
     this.state = this.game.gameState;
     this.events = this.game.events;
     this.tileWorld = new World(this);
-    this.player = new Entity(this.makePlayerOptions());
+    this.player = new Player({game: main.game, world: main.tileWorld});
     this.cameraManager = new CameraManager(this.game);
     this.progression = new Progression(this.state);
     this.monsters = new Map();
@@ -53,15 +54,6 @@ export default class MainGame extends Phaser.State {
         else this.hunt();
       }
     }
-  }
-
-  makePlayerOptions() {
-    const tile = this.tileWorld.getLocation('spawn');
-    const spriteName = 'platearmor';
-    const level = 10;
-    const game = this.game;
-    const world = this.tileWorld;
-    return {tile, spriteName, level, game, world};
   }
 
   notUpgrading() {

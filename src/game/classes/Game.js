@@ -5,7 +5,6 @@ import {EventEmitter} from 'events';
 
 export default class Game extends Phaser.Game {
   constructor(element, state) {
-    console.log('is', state);
     super(800, 300, Phaser.AUTO, element);
     this.state.add('Boot', Boot, true);
     this.state.add('MainGame', MainGame);

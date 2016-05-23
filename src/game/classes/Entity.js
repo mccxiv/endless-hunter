@@ -1,230 +1,221 @@
 import sleep from 'sleep-promise';
 import EventEmitter from 'events';
 
-export default function Entity({tile: {x, y}, spriteName, level, game, world}) {
-  const state = {
-    sprite: null,
-    path: [],
-    moving: false,
-    facing: null,
-    hp: level * 10,
-    target: null,
-    events: new EventEmitter()
-  };
-  const  self = {
-    events: state.events,
-    goTo,
-    struck,
-    attack,
-    heal,
-    getHp,
-    getMaxHp,
-    getTile,
-    getSprite,
-    isIdle,
-    clearTarget
-  };
+export default class Entity {
+  constructor({tile: {x, y}, spriteName, level, game, world}) {
+    this.game = game;
+    this.world = world;
+    this.events = new EventEmitter();
+    this.state = {
+      sprite: null,
+      path: [],
+      moving: false,
+      facing: null,
+      hp: level * 10,
+      target: null
+    };
+    this._makeSprite(world.toPixel({x, y}), spriteName);
+  }
 
-  makeSprite(world.toPixel({x, y}), spriteName);
-
-  return self;
-
-  function clearTarget() {
-    state.target = null;
+  clearTarget() {
+    this.state.target = null;
   }
   
-  function goTo({x, y}) {
-    const from = getTile();
-    const path = world.pathTo(from, {x, y});
+  goTo({x, y}) {
+    const from = this.getTile();
+    const path = this.world.pathTo(from, {x, y});
     if (!path) return;
-    state.path = path;
-    if (!state.moving) moveToNextTile();
+    this.state.path = path;
+    if (!this.state.moving) this._moveToNextTile();
   }
 
-  function heal(hp) {
+  heal(hp) {
     const max = this.getMaxHp();
-    const before = state.hp;
-    if (state.hp + hp > max) state.hp = max;
-    else state.hp += hp;
-    if (state.hp !== before) state.events.emit('hp', state.hp);
+    const before = this.state.hp;
+    if (this.state.hp + hp > max) this.state.hp = max;
+    else this.state.hp += hp;
+    if (this.state.hp !== before) this.events.emit('hp', this.state.hp);
   }
 
-  function face(direction) {
+  face(direction) {
     let d = direction;
     if (typeof direction !== 'string') {
-      const {x, y} = getTile();
+      const {x, y} = this.getTile();
       if (x < direction.x) d = 'right';
       else if (x > direction.x) d = 'left';
       else if (y < direction.y) d = 'down';
       else d = 'up';
     }
-    state.facing = d;
+    this.state.facing = d;
   }
 
-  function struck(entity) {
-    state.hp -= 10;
-    state.events.emit('hp', state.hp);
-    if (state.hp < 1) kill();
-    else if (!haveTarget()) attack(entity);
+  struck(entity) {
+    this.state.hp -= 10;
+    this.events.emit('hp', this.state.hp);
+    if (this.state.hp < 1) this.kill();
+    else if (!this.haveTarget()) this.attack(entity);
   }
 
-  async function kill() {
-    state.hp = 0;
-    state.events.emit('hp', state.hp);
-    animate('death');
+  async kill() {
+    this.state.hp = 0;
+    this.events.emit('hp', this.state.hp);
+    this._animate('death');
     await sleep(1000);
-    state.sprite.kill();
-    state.sprite.destroy();
-    state.events.emit('death');
-    if (haveTarget()) state.target.events.removeListener('death', clearTarget);
-    state.events.removeAllListeners();
-  }
-
-  function attack(entity) {
-    if (isDead()) return;
-    if (entity) {
-      state.target = entity;
-      // TODO BUG!!! Stop listening on target switch.
-      entity.events.once('death', clearTarget);
+    this.state.sprite.kill();
+    this.state.sprite.destroy();
+    this.events.emit('death');
+    if (this.haveTarget()) {
+      const clear = this::this.clearTarget;
+      this.state.target.events.removeListener('death', clear);
     }
-    if (!haveTarget()) return;
-    if (nextToTarget()) strike();
-    else goTo(state.target.getTile());
+    this.events.removeAllListeners();
   }
 
-  function getHp() {
-    return state.hp;
+  attack(entity) {
+    if (this._isDead()) return;
+    if (entity) {
+      this.state.target = entity;
+      // TODO BUG!!! Stop listening on target switch.
+      entity.events.once('death', this::this.clearTarget);
+    }
+    if (!this.haveTarget()) return;
+    if (this._nextToTarget()) this._strike();
+    else this.goTo(this.state.target.getTile());
+  }
+
+  getHp() {
+    return this.state.hp;
   }
   
-  function getMaxHp() {
-    return level * 10;
+  getMaxHp() {
+    return this.state.level * 10;
   }
 
-  function getTile() {
-    return world.toTile(state.sprite);
+  getTile() {
+    return this.world.toTile(this.state.sprite);
   }
   
-  function getSprite() {
-    return state.sprite;
+  getSprite() {
+    return this.state.sprite;
   }
 
-  function isIdle() {
-    return !state.target && !state.moving;
+  isIdle() {
+    return !this.state.target && !this.state.moving;
+  }
+  
+  haveTarget() {
+    return !!this.state.target;
   }
 
-  function moveToNextTile() {
-    if (isDead()) return;
-    state.moving = true;
-    faceNextTile();
-    setWalkingAnimation();
-    const {x, y} = world.toPixel(nextTile());
-    const tween = game.add.tween(state.sprite);
+  _moveToNextTile() {
+    if (this._isDead()) return;
+    this.state.moving = true;
+    this._faceNextTile();
+    this._setWalkingAnimation();
+    const {x, y} = this.world.toPixel(this._nextTile());
+    const tween = this.game.add.tween(this.state.sprite);
     tween.to({x, y}, 400);
-    tween.onComplete.addOnce(onNewTile);
+    tween.onComplete.addOnce(this::this._onNewTile);
     tween.start();
   }
 
-  function onNewTile() {
-    state.moving = false;
-    advancePath();
-    if (haveTarget() && nextToTarget()) attack();
-    else if (nextTile()) moveToNextTile();
-    else setIdleAnimation();
+  _onNewTile() {
+    this.state.moving = false;
+    this._advancePath();
+    if (this.haveTarget() && this._nextToTarget()) this.attack();
+    else if (this._nextTile()) this._moveToNextTile();
+    else this._setIdleAnimation();
   }
 
-  function haveTarget() {
-    return !!state.target;
-  }
-
-  function nextToTarget() {
-    const {x, y} = getTile();
-    const {x: tx, y: ty} = state.target.getTile();
+  _nextToTarget() {
+    const {x, y} = this.getTile();
+    const {x: tx, y: ty} = this.state.target.getTile();
     if (x === tx && (y - 1 === ty || y + 1 === ty)) return true;
     return !!(y === ty && (x - 1 === tx || x + 1 === tx));
   }
 
-  async function strike() {
-    face(state.target.getTile());
-    doAttackAnimation();
+  async _strike() {
+    this.face(this.state.target.getTile());
+    this._doAttackAnimation();
     await sleep(500);
-    if (isDead()) return;
-    if (!haveTarget()) return;
-    state.target.struck(self);
+    if (this._isDead()) return;
+    if (!this.haveTarget()) return;
+    this.state.target.struck(self);
     await sleep(500);
-    setIdleAnimation();
+    this._setIdleAnimation();
     await sleep(1000);
-    attack();
+    this.attack();
   }
 
-  function faceNextTile() {
-    const curr = getTile();
-    const next = nextTile();
+  _faceNextTile() {
+    const curr = this.getTile();
+    const next = this._nextTile();
     let direction = 'down';
     if (curr.x < next.x) direction = 'right';
     else if (curr.x > next.x) direction = 'left';
     else if (curr.y < next.y) direction = 'down';
     else if (curr.y > next.y) direction = 'up';
     else console.warn('Current and Next tile were the same.');
-    face(direction);
+    this.face(direction);
   }
 
-  function doAttackAnimation() {
-    animate('atk', state.facing);
+  _doAttackAnimation() {
+    this._animate('atk', this.state.facing);
   }
 
-  function setWalkingAnimation() {
-    animate('walk', state.facing);
+  _setWalkingAnimation() {
+    this._animate('walk', this.state.facing);
   }
 
-  function setIdleAnimation() {
-    animate('idle', state.facing);
+  _setIdleAnimation() {
+    this._animate('idle', this.state.facing);
   }
 
-  function animate(animation, facing) {
+  _animate(animation, facing) {
     if (facing === 'left') {
       facing = 'right';
-      state.sprite.scale.x = -1;
+      this.state.sprite.scale.x = -1;
     }
-    else state.sprite.scale.x = 1;
+    else this.state.sprite.scale.x = 1;
     const animationName = facing? `${animation}_${facing}` : animation;
-    state.sprite.animations.play(animationName);
+    this.state.sprite.animations.play(animationName);
   }
 
-  function advancePath() {
-    state.path.shift();
+  _advancePath() {
+    this.state.path.shift();
   }
 
-  function nextTile() {
-    if (!state.path.length) return null;
-    return state.path[0];
+  _nextTile() {
+    if (!this.state.path.length) return null;
+    return this.state.path[0];
   }
 
-  function makeSprite({x, y}, spriteName) {
-    state.sprite = game.add.sprite(x, y, spriteName);
-    state.sprite.anchor.setTo(0.5, 0.5);
-    face(randomFacing());
-    createAnimations(spriteName);
+  _makeSprite({x, y}, spriteName) {
+    this.state.sprite = this.game.add.sprite(x, y, spriteName);
+    this.state.sprite.anchor.setTo(0.5, 0.5);
+    this.face(this._randomFacing());
+    this._createAnimations(spriteName);
   }
 
-  function isDead() {
-    return state.hp < 1;
+  _isDead() {
+    return this.state.hp < 1;
   }
 
-  function createAnimations(spriteName) {
-    const data = game.cache.getJSON(spriteName);
-    const rowLength = state.sprite.texture.width / data.width;
+  _createAnimations(spriteName) {
+    const data = this.game.cache.getJSON(spriteName);
+    const rowLength = this.state.sprite.texture.width / data.width;
     Object.keys(data.animations).forEach((animationName) => {
       const animation = data.animations[animationName];
       const firstFrame = rowLength * animation.row;
       const mask = new Array(animation.length).fill(0);
       const frames = mask.map((v, i) => firstFrame + i);
       const args = [animationName, frames, animation.length, true];
-      state.sprite.animations.add(...args);
+      this.state.sprite.animations.add(...args);
     });
-    animate('idle', state.facing);
+    this._animate('idle', this.state.facing);
   }
 
-  function randomFacing() {
-    return game.rnd.pick(['left', 'right', 'up', 'down']);
+  _randomFacing() {
+    return this.game.rnd.pick(['left', 'right', 'up', 'down']);
   }
 }
