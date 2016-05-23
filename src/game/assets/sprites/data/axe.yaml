@@ -1,6 +1,6 @@
 id: axe
-width: 48
-height: 48
+width: 96
+height: 96
 animations:
   atk_right:  {length: 5, row: 0}
   walk_right: {length: 4, row: 1}
@@ -11,5 +11,5 @@ animations:
   atk_down:   {length: 5, row: 6}
   walk_down:  {length: 4, row: 7}
   idle_down:  {length: 2, row: 8}
-offset_x: -16
-offset_y: -20
+offset_x: -32
+offset_y: -40

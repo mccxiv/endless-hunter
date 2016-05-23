@@ -77,6 +77,9 @@ export default class Entity {
     if (entity) {
       this.state.target = entity;
       // TODO BUG!!! Stop listening on target switch.
+      if (!entity.events) {
+        console.warn('missing events?', entity);
+      }
       entity.events.once('death', this::this.clearTarget);
     }
     if (!this.haveTarget()) return;
