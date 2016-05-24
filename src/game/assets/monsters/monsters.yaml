@@ -1,0 +1,19 @@
+rat:
+  drops:
+    - High Quality Fiber
+    - Piece of Clay
+bat:
+  drops:
+    - Balanced Feather
+goblin:
+  drops:
+    - Goblin Chainmail
+    - Piece of Coal
+skeleton:
+  drops:
+    - Ogre Club
+    - Tiny Gold Nugget
+    - Oversized Bone
+spectre:
+  drops:
+    - Crystal

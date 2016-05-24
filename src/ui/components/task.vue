@@ -33,7 +33,7 @@
     }
   }
 
-  function startsWithVowel(string) {
+  function startsWithVowel(string = '') {
     return (/^[aeiou]$/i).test(string.charAt(0));
   }
 </script>

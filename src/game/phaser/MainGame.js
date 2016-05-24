@@ -1,5 +1,6 @@
 import sleep from 'sleep-promise';
 import Items from '../classes/Items';
+import Monsters from '../classes/Monsters';
 import Phaser from 'phaser-shim';
 import World from '../classes/World';
 import Player from '../classes/Player';
@@ -115,7 +116,9 @@ export default class MainGame extends Phaser.State {
   }
 
   getNextMonster() {
-    return this.monsterManager.getRandomMonster('rat');
+    const drop = this.progression.getNeededDrops()[0];
+    const monsterName = Monsters.thatDrops(drop);
+    return this.monsterManager.getRandomMonster(monsterName);
   }
 
   listenToClicks() {

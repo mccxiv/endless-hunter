@@ -24,7 +24,6 @@ export default class Entity {
     this.state.hp = level * 10;
     this.state.facing = this._randomFacing();
 
-    console.log(spriteName);
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
     this._onTargetKilledBound = this::this._onTargetKilled;
     this._setupEventEmitters();
@@ -69,8 +68,8 @@ export default class Entity {
   async kill() {
     this.state.hp = 0;
     this.events.emit('death');
-    const death = this._animate('death');
-    death.onComplete.addOnce(() => {
+    const deathAnimation = this._animate('death');
+    const finish = () => {
       this._mainSprite().kill();
       this._mainSprite().destroy();
       if (this.haveTarget()) {
@@ -78,7 +77,9 @@ export default class Entity {
         this.state.target.events.removeListener('death', cb);
       }
       this.events.removeAllListeners();
-    });
+    }
+    if (deathAnimation) deathAnimation.onComplete.addOnce(finish);
+    else finish();
   }
 
   attack(entity) {

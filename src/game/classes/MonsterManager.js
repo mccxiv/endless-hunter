@@ -1,5 +1,5 @@
 import sleep from 'sleep-promise';
-import monsters from '../assets/monsters.yaml';
+import monsters from '../assets/monsters/monsters.yaml';
 import Entity from './Entity';
 
 export default class MonsterManager {
@@ -13,7 +13,7 @@ export default class MonsterManager {
   }
 
   spawnAll() {
-    monsters.forEach((name) => {
+    Object.keys(monsters).forEach((name) => {
       this._world.getEntityLocations(name).forEach(spawnLocation => {
         const data = this._game.cache.getJSON(name);
         this._createMonsterSpawner(spawnLocation, name, data.level);
