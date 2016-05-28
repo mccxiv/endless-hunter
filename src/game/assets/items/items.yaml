@@ -14,23 +14,12 @@ tiers:
   - relic
   - radiant
 weapons:
-  - Club
-  - Spear Stick
-  - Battlespork
-  - Elven Shovel
-  - Rat-head Flail
-  - Wooden Axe
-  - Cheery Dagger
-  - Bamboo Stick
-  - Carved Mammoth Femur
-  - Short Sword
-  - Hunting Spear
-  - Mechanical Metal Club
-  - Scimitar
-  - Katana
-  - Mythril Twin Blades
-  - Scythe of Lorz
-  - Plunderfury, Blessed Blade of the Goldseeker
+  - Wooden Sword
+#  - Club
+#  - Steel Sword
+#  - Steel Axe
+armor:
+  - Plate Armor
 drops:
   common:
     - High Quality Fiber

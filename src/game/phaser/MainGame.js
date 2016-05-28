@@ -24,9 +24,16 @@ export default class MainGame extends Phaser.State {
     this.state = this.game.gameState;
     this.events = this.game.events;
     this.tileWorld = new World(this);
-    this.player = new Player({game: main.game, world: main.tileWorld});
+    this.player = new Player({
+      game: main.game,
+      world: main.tileWorld,
+      state: main.state
+    });
     this.cameraManager = new CameraManager(this.game);
-    this.monsterManager = new MonsterManager({game: main.game, world: this.tileWorld});
+    this.monsterManager = new MonsterManager({
+      game: main.game,
+      world: this.tileWorld
+    });
     this.progression = new Progression(this.state);
   }
   

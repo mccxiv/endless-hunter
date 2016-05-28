@@ -1,8 +1,8 @@
 import Phaser from 'phaser-shim';
 import monsters from '../assets/monsters/monsters.yaml';
+import Items from '../classes/Items';
 
 const load = require.context('../assets/', true, /.*/);
-const playerSprites = ['platearmor', 'axe'];
 
 export default class Boot extends Phaser.State {
   preload() {
@@ -33,7 +33,9 @@ export default class Boot extends Phaser.State {
 
   loadSprites() {
     const monsterNames = Object.keys(monsters);
-    [...monsterNames, ...playerSprites].forEach((sprite) => {
+    const weapons = Items.weapons.map(Items.toFilename);
+    const armor = Items.armor.map(Items.toFilename);
+    [...monsterNames, ...weapons, ...armor].forEach((sprite) => {
       const data = load(`./sprites/data/${sprite}.yaml`);
       const imageUri = load(`./sprites/img/${sprite}.png`);
       const image = this.image(imageUri);

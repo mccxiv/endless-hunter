@@ -58,4 +58,17 @@ export default class Items {
   static isRareDrop(drop) {
     return items.drops.rare.includes(drop);
   }
+
+  static toFilename(itemName) {
+    itemName = itemName.toLowerCase().replace(/[^a-z0-9- ]+/g, '');
+    return itemName.replace(' ', '-');
+  }
+
+  static get armor() {
+    return items.armor;
+  }
+
+  static get weapons() {
+    return items.weapons;
+  }
 }

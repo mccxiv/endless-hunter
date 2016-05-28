@@ -7,6 +7,10 @@ export default function createState() {
     healthiness: 100,
     inventory: [],
     recipe: [...Items.generateRandomRecipe()],
+    equipment: {
+      armor: 'Plate Armor',
+      weapon: 'Wooden Sword'
+    },
     activity: null
   };
 }
