@@ -180,6 +180,7 @@ export default class Entity {
     const animationDuration = 1000 / this.animationSpeed;
     const halfAnimationDuration = Math.floor(animationDuration / 2);
     animation.onComplete.addOnce(async () => {
+      this.events.emit('strike');
       this._setIdleAnimation();
       await sleep(1000);
       this.attack();

@@ -2,8 +2,10 @@ import Items from '../classes/Items';
 
 export default function createState() {
   return {
-    level: 2,
-    energy: 100,
+    experience: {
+      combat: 0
+    },
+    energy: 1000,
     healthiness: 100,
     inventory: [],
     recipe: [...Items.generateRandomRecipe()],

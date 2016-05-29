@@ -1,4 +1,3 @@
-import sleep from 'sleep-promise';
 import Items from '../classes/Items';
 import Monsters from '../classes/Monsters';
 import Phaser from 'phaser-shim';
@@ -30,6 +29,7 @@ export default class MainGame extends Phaser.State {
       state: main.state
     });
     this.cameraManager = new CameraManager(this.game);
+    this.cameraManager.setSprite(this.player.getSprite());
     this.monsterManager = new MonsterManager({
       game: main.game,
       world: this.tileWorld
@@ -39,8 +39,6 @@ export default class MainGame extends Phaser.State {
   
 	create() {
     this.listenToClicks();
-    this.makePlayer();
-    this.giveCameraManagerASpriteToFollow();
     this.monsterManager.spawnAll();
 
     setInterval(() => this.player.heal(1), 225); // Regen player HP.
@@ -48,7 +46,6 @@ export default class MainGame extends Phaser.State {
 	}
   
   update() {
-    this.cameraManager.updatePosition();
     if (this.hasEnergy()) {
       if (this.player.isIdle()) {
         if (this.progression.canUpgrade()) {
@@ -60,6 +57,7 @@ export default class MainGame extends Phaser.State {
         else this.hunt();
       }
     }
+    this.cameraManager.updatePosition();
   }
 
   notUpgrading() {
@@ -109,17 +107,6 @@ export default class MainGame extends Phaser.State {
     }
 
     function oneIn(chance) {return integerInRange(1, chance) === 1}
-  }
-
-  makePlayer() {
-    this.player.events.on('hp', hp => {
-      this.state.healthiness = Math.round((hp / this.player.getMaxHp() * 100));
-    });
-    this.player.events.once('death', () => this.makePlayer());
-  }
-
-  giveCameraManagerASpriteToFollow() {
-    this.cameraManager.setSprite(this.player.getSprite());
   }
 
   getNextMonster() {
