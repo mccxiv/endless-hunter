@@ -8,7 +8,7 @@ export default class Player extends Entity {
   constructor({game, world, state}) {
     const tile = world.getLocation('spawn');
     const spriteName = Items.toFilename(state.equipment.armor);
-    super({tile, spriteName, level: 10, game, world});
+    super({tile, spriteName, hp: 100, game, world});
     this._state = state;
     this._equipment = state.equipment;
     this._addWeaponSprite();

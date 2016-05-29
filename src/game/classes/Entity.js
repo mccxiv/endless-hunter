@@ -9,19 +9,19 @@ export default class Entity {
   state = {
     sprites: [],
     path: [],
-    level: null,
     moving: false,
     resting: false,
     facing: null,
     hp: null,
+    maxHp: null,
     target: null
   };
 
-  constructor({tile: {x, y}, spriteName, level, game, world}) {
+  constructor({tile: {x, y}, spriteName, hp, game, world}) {
     this.game = game;
     this.world = world;
-    this.state.level = level;
-    this.state.hp = level * 10;
+    this.state.maxHp = hp;
+    this.state.hp = hp;
     this.state.facing = this._randomFacing();
 
     this._addSprite({name: spriteName, position: world.toPixel({x, y})});
@@ -99,7 +99,7 @@ export default class Entity {
   }
   
   getMaxHp() {
-    return this.state.level * 10;
+    return this.state.maxHp;
   }
 
   getTile() {
